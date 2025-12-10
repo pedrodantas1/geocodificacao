@@ -1,7 +1,7 @@
 import googlemaps
 
 # Sua chave da API do Google
-GOOGLE_API_KEY = "AIzaSyDkoqPQcARtILXEr90dvDuAEaHr0F91_8A"
+GOOGLE_API_KEY = "preencher"
 
 # Inicializa o cliente
 gmaps = googlemaps.Client(key=GOOGLE_API_KEY)
