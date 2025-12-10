@@ -1,6 +1,6 @@
 import pandas as pd
 
-# Caminho do arquivo original (troque para o seu)
+# Caminho do arquivo original
 input_file = "DENGBR25.csv"
 
 # Arquivo de saída
