@@ -8,7 +8,7 @@ from tqdm import tqdm
 # ============================
 # CONFIGURAÇÕES
 # ============================
-GOOGLE_API_KEY = "AIzaSyC5KO1WWahti8ZMX242S9vCIuQe96V3WIs"  # <--- Coloque sua chave
+GOOGLE_API_KEY = "preencher"  # <--- Coloque sua chave
 
 PASTA_TRATADOS = "Dados_Tratados"
 ARQUIVO_ORIGINAL = os.path.join(PASTA_TRATADOS, "Dim_Unidades_Saude.csv")
