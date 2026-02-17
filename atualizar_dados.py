@@ -140,7 +140,7 @@ def processar_fatos_dengue():
     else:
         print("❌ Nenhum dado processado.")
     
-def criar_dimensao_unidades_saude(usar_api_para_preencher_vazios=False):
+def criar_dimensao_unidades_saude():
     print("\n--- 3. Criando Dimensão Unidades de Saúde (CNES) ---")
     
     arquivo_cnes = os.path.join(PASTA_AUXILIARES, 'tbEstabelecimento.csv')
@@ -153,6 +153,7 @@ def criar_dimensao_unidades_saude(usar_api_para_preencher_vazios=False):
     # Mapeamento de colunas (ajuste conforme o CSV que você baixar)
     colunas_para_ler = {
         'CO_CNES': 'CNES',
+        'CO_IBGE': 'ID_Municipio',
         'NO_FANTASIA': 'Nome_Unidade',
         'NU_LATITUDE': 'Latitude',
         'NU_LONGITUDE': 'Longitude',
@@ -181,40 +182,11 @@ def criar_dimensao_unidades_saude(usar_api_para_preencher_vazios=False):
         for col in ['Latitude', 'Longitude']:
             if col in df_unidades.columns:
                 df_unidades[col] = df_unidades[col].astype(str).str.replace(',', '.').replace('nan', None)
-
-        # --- GEOCODING (O PULO DO GATO) ---
-        if usar_api_para_preencher_vazios:
-            print("   Iniciando preenchimento de coordenadas via API (Isso pode demorar)...")
-            
-            geolocator = Nominatim(user_agent="meu_bi_dengue_app")
-            geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
-
-            # Filtra apenas quem não tem latitude definida
-            mask_sem_geo = (df_unidades['Latitude'].isnull()) | (df_unidades['Latitude'] == '') | (df_unidades['Latitude'] == 'None')
-            
-            # Função auxiliar para criar endereço completo
-            def criar_endereco(row):
-                # É ideal ter o nome da cidade aqui. Se não tiver no CSV do CNES,
-                # precisaria cruzar com a tabela de municipios antes.
-                # Assumindo formato simples:
-                return f"{row.get('Rua','')}, {row.get('Numero','')}, {row.get('Bairro','')}, Brasil"
-
-            # Aplica apenas nas linhas vazias (limitado a 10 para teste, remova o .head(10) em produção)
-            print(f"   Tentando geolocalizar {df_unidades[mask_sem_geo].shape[0]} unidades...")
-            
-            # CUIDADO: Fazer isso para 50 mil linhas vai demorar dias e bloquear seu IP no Nominatim.
-            # Use APIs pagas (Google/Bing) se o volume for alto.
-            
-            for index, row in df_unidades[mask_sem_geo].head(10).iterrows():
-                endereco = criar_endereco(row)
-                try:
-                    location = geocode(endereco)
-                    if location:
-                        df_unidades.at[index, 'Latitude'] = location.latitude
-                        df_unidades.at[index, 'Longitude'] = location.longitude
-                        print(f"   📍 Encontrado: {row['Nome_Unidade']}")
-                except:
-                    pass
+                
+        if 'ID_Municipio' in df_unidades.columns:
+             df_unidades['ID_Municipio'] = df_unidades['ID_Municipio'].apply(tratar_codigo_ibge)
+             # Substitui todas as ocorrências de '530040' por '530010'
+             df_unidades['ID_Municipio'] = df_unidades['ID_Municipio'].replace('530040', '530010')
 
         # Salvar Dimensão CNES
         df_unidades.to_csv(os.path.join(PASTA_TRATADOS, 'Dim_Unidades_Saude.csv'), index=False, sep=';')
@@ -226,5 +198,5 @@ def criar_dimensao_unidades_saude(usar_api_para_preencher_vazios=False):
 if __name__ == "__main__":
     # carregar_dimensao_geografia()
     # processar_fatos_dengue()
-    criar_dimensao_unidades_saude(usar_api_para_preencher_vazios=False)
+    criar_dimensao_unidades_saude()
     print("\nProcesso finalizado! Pode atualizar o BI.")
