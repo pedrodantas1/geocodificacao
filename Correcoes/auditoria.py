@@ -96,10 +96,6 @@ def auditar_espacialmente_com_ibge():
         id_mun_mapa = str(id_mapa_original).strip()
 
         # Checa se é nulo real (pd.isna), se a string ficou vazia, ou se virou 'nan' / 'None'
-        if row["CNES"] == "25518":
-            print(
-                f"DEBUG: CNES 21830 - ID_Municipio CSV: '{id_mun_csv}', ID_Mapa: '{id_mun_mapa}'"
-            )
         if (
             pd.isna(id_mapa_original)
             or not id_mun_mapa
